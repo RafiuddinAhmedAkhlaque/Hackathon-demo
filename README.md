@@ -11,13 +11,7 @@ A simple, clean note-taking web application built with vanilla HTML, CSS, and Ja
 - **Persistent Storage**: Notes are saved in localStorage and persist across page refreshes
 - **Modern UI**: Clean design with smooth animations and transitions
 - **Responsive**: Works great on desktop, tablet, and mobile devices
-- **API Backend**: Flask backend with hello endpoint
-
-## Getting Started
-
-### Frontend Only
-Simply open `index.html` in your web browser. No build tools or server required!
-- **API Endpoints**: RESTful API for programmatic access
+- **API Backend**: Flask backend with hello and health endpoints
 
 ## API Endpoints
 
@@ -33,11 +27,31 @@ Returns a simple greeting message.
 
 **Status Code:** 200
 
+### GET /health
+Returns the health status of the application with system information.
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:30:45.123456Z",
+  "version": "1.0.0"
+}
+```
+
+**Status Code:** 200
+
+**Response Fields:**
+- `status`: Current health status of the application (always "healthy")
+- `timestamp`: Current UTC timestamp in ISO format
+- `version`: Application version number
+
 ## Getting Started
 
 ### Prerequisites
 - Node.js (version 14 or higher)
 - npm (comes with Node.js)
+- Python 3.7+ (for Flask backend)
 
 ### Installation
 
@@ -53,7 +67,7 @@ npm start
 ```
 
 ### Backend API
-To run the Flask backend with the hello endpoint:
+To run the Flask backend with the API endpoints:
 
 ```bash
 # Install dependencies
@@ -66,7 +80,7 @@ python app.py
 The API will be available at `http://localhost:5000`
 
 ### Running Tests
-To run the unit tests for the hello endpoint:
+To run the unit tests for the API endpoints:
 
 ```bash
 # Make sure dependencies are installed
@@ -83,17 +97,10 @@ pytest test_hello.py -v
 ├── styles.css      # All CSS styles
 ├── app.js          # JavaScript application logic (frontend)
 ├── app.py          # Flask backend application
-├── test_hello.py   # Unit tests for hello endpoint
+├── test_hello.py   # Unit tests for API endpoints
 ├── requirements.txt # Python dependencies
 ├── pytest.ini     # Pytest configuration
 └── README.md       # This file
-4. Open your browser and visit `http://localhost:3000`
-
-### Development Mode
-
-For development with auto-reload:
-```bash
-npm run dev
 ```
 
 ## Testing the API
@@ -102,25 +109,15 @@ You can test the API endpoints using curl or any HTTP client:
 
 ```bash
 # Test the hello endpoint
-curl http://localhost:3000/hello
+curl http://localhost:5000/hello
+
+# Test the health endpoint
+curl http://localhost:5000/health
 ```
 
-Or visit `http://localhost:3000/hello` directly in your browser.
-
-## Project Structure
-
-```
-├── index.html     # Main HTML entry point
-├── styles.css     # All CSS styles
-├── app.js         # Frontend JavaScript application logic
-├── server.js      # Express.js server with API endpoints
-├── package.json   # Node.js project configuration
-└── README.md      # This file
-```
-
-## API Endpoints
-
-- `GET /hello` - Returns a hello world message
+Or visit the endpoints directly in your browser:
+- `http://localhost:5000/hello`
+- `http://localhost:5000/health`
 
 ## Usage
 
@@ -128,7 +125,7 @@ Or visit `http://localhost:3000/hello` directly in your browser.
 2. **View notes**: All saved notes appear as cards in the grid below the form
 3. **Delete a note**: Click the × button on any note card to remove it
 4. **Keyboard shortcut**: Press `Ctrl/Cmd + Enter` while in the form to quickly save a note
-5. **API Access**: Use the `/hello` endpoint to get a programmatic greeting
+5. **API Access**: Use the `/hello` and `/health` endpoints for programmatic access
 
 ## Browser Support
 
@@ -144,9 +141,6 @@ Works in all modern browsers:
 - **Frontend Dependencies**: Pure vanilla JavaScript with no external libraries
 - **Backend**: Flask Python web framework
 - **Testing**: pytest for unit tests
-- **Frontend**: Pure vanilla JavaScript with no external libraries
-- **Backend**: Express.js server for API endpoints
-- **Storage**: Uses browser's localStorage API for data persistence (frontend)
 - **Responsive design**: CSS Grid and Flexbox for layout
 - **Animations**: CSS animations and transitions for smooth UX
 
