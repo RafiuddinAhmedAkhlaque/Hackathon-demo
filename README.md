@@ -10,7 +10,7 @@ A simple, clean note-taking web application built with vanilla HTML, CSS, and Ja
 - **Persistent Storage**: Notes are saved in localStorage and persist across page refreshes
 - **Modern UI**: Clean design with smooth animations and transitions
 - **Responsive**: Works great on desktop, tablet, and mobile devices
-- **API Backend**: Flask backend with hello endpoint
+- **API Backend**: Flask backend with hello and math endpoints
 - **Request Logging**: Automatic logging of all HTTP requests with timing information
 
 ## API Endpoints
@@ -39,6 +39,60 @@ Returns a simple farewell message.
 
 **Status Code:** 200
 
+### POST /math
+Performs basic arithmetic operations on two numbers.
+
+**Request Body:**
+```json
+{
+  "operation": "add",
+  "a": 10,
+  "b": 5
+}
+```
+
+**Supported Operations:**
+- `add` - Returns a + b
+- `subtract` - Returns a - b
+- `multiply` - Returns a * b
+- `divide` - Returns a / b
+
+**Response:**
+```json
+{
+  "operation": "add",
+  "a": 10,
+  "b": 5,
+  "result": 15
+}
+```
+
+**Status Code:** 200
+
+**Error Responses:**
+- 400 - If operation is not supported
+- 400 - If required fields (operation, a, b) are missing
+- 400 - If dividing by zero (returns `{"error": "Cannot divide by zero"}`)
+- 400 - If a or b are not valid numbers
+
+**Example Usage:**
+```bash
+# Addition
+curl -X POST http://localhost:5000/math \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "add", "a": 10, "b": 5}'
+
+# Division
+curl -X POST http://localhost:5000/math \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "divide", "a": 20, "b": 4}'
+
+# With decimals
+curl -X POST http://localhost:5000/math \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "multiply", "a": 3.5, "b": 2.2}'
+```
+
 ## Request Logging
 
 The Flask application includes comprehensive request logging middleware that automatically logs:
@@ -50,7 +104,7 @@ The Flask application includes comprehensive request logging middleware that aut
 All requests are logged at the INFO level using Python's logging module. Example log output:
 ```
 2024-01-15 10:30:45,123 - app - INFO - Request: GET /hello - Status: 200 - Duration: 15.23 ms
-2024-01-15 10:30:46,456 - app - INFO - Request: GET /goodbye - Status: 200 - Duration: 12.78 ms
+2024-01-15 10:30:46,456 - app - INFO - Request: POST /math - Status: 200 - Duration: 12.78 ms
 2024-01-15 10:30:47,789 - app - INFO - Request: GET /nonexistent - Status: 404 - Duration: 8.45 ms
 ```
 
@@ -92,6 +146,7 @@ pytest -v
 
 # Run specific test files
 pytest test_hello.py -v
+pytest test_math.py -v
 pytest test_logging_middleware.py -v
 ```
 
@@ -103,6 +158,7 @@ pytest test_logging_middleware.py -v
 ├── app.js                   # JavaScript application logic (frontend)
 ├── app.py                   # Flask backend application with logging middleware
 ├── test_hello.py            # Unit tests for hello/goodbye endpoints
+├── test_math.py             # Unit tests for math endpoint
 ├── test_logging_middleware.py # Unit tests for logging middleware
 ├── demo_logging.py          # Demo script to test logging functionality
 ├── requirements.txt         # Python dependencies
@@ -128,6 +184,11 @@ curl http://localhost:5000/hello
 # Test the goodbye endpoint
 curl http://localhost:5000/goodbye
 
+# Test the math endpoint
+curl -X POST http://localhost:5000/math \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "add", "a": 10, "b": 5}'
+
 # Test a non-existent endpoint (will return 404)
 curl http://localhost:5000/nonexistent
 ```
@@ -150,6 +211,7 @@ Works in all modern browsers:
 - **Testing**: pytest for unit tests with pytest-flask for Flask-specific testing
 - **Logging**: Python's built-in logging module with INFO level
 - **Request Timing**: High-precision timing using `time.time()` for millisecond accuracy
+- **Math Operations**: Supports integer and decimal (float) numbers
 - **Responsive design**: CSS Grid and Flexbox for layout
 - **Animations**: CSS animations and transitions for smooth UX
 

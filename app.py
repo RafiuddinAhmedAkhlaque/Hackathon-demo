@@ -44,5 +44,60 @@ def goodbye():
     """Goodbye endpoint that returns a farewell message"""
     return jsonify({"message": "Goodbye, World!"})
 
+@app.route('/math', methods=['POST'])
+def math():
+    """Math endpoint that performs basic arithmetic operations"""
+    try:
+        data = request.get_json()
+        
+        # Validate request body exists
+        if not data:
+            return jsonify({"error": "Request body is required"}), 400
+        
+        # Check if required fields are present
+        if 'operation' not in data:
+            return jsonify({"error": "Field 'operation' is required"}), 400
+        if 'a' not in data:
+            return jsonify({"error": "Field 'a' is required"}), 400
+        if 'b' not in data:
+            return jsonify({"error": "Field 'b' is required"}), 400
+        
+        operation = data['operation']
+        
+        # Validate operation type
+        supported_operations = ['add', 'subtract', 'multiply', 'divide']
+        if operation not in supported_operations:
+            return jsonify({"error": f"Operation '{operation}' is not supported. Supported operations: {', '.join(supported_operations)}"}), 400
+        
+        # Extract and validate numbers
+        try:
+            a = float(data['a'])
+            b = float(data['b'])
+        except (ValueError, TypeError):
+            return jsonify({"error": "Fields 'a' and 'b' must be valid numbers"}), 400
+        
+        # Perform calculation
+        if operation == 'add':
+            result = a + b
+        elif operation == 'subtract':
+            result = a - b
+        elif operation == 'multiply':
+            result = a * b
+        elif operation == 'divide':
+            if b == 0:
+                return jsonify({"error": "Cannot divide by zero"}), 400
+            result = a / b
+        
+        return jsonify({
+            "operation": operation,
+            "a": a,
+            "b": b,
+            "result": result
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in math endpoint: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
