@@ -10,7 +10,7 @@ A simple, clean note-taking web application built with vanilla HTML, CSS, and Ja
 - **Persistent Storage**: Notes are saved in localStorage and persist across page refreshes
 - **Modern UI**: Clean design with smooth animations and transitions
 - **Responsive**: Works great on desktop, tablet, and mobile devices
-- **API Backend**: Flask backend with hello endpoint
+- **API Backend**: Flask backend with hello endpoint and math calculations
 - **Request Logging**: Automatic logging of all HTTP requests with timing information
 
 ## API Endpoints
@@ -39,6 +39,45 @@ Returns a simple farewell message.
 
 **Status Code:** 200
 
+### POST /math
+Performs basic arithmetic operations on two numbers.
+
+**Request Body:**
+```json
+{
+  "operation": "add",
+  "a": 10,
+  "b": 5
+}
+```
+
+**Supported Operations:**
+- `add` - Addition (a + b)
+- `subtract` - Subtraction (a - b)
+- `multiply` - Multiplication (a * b)
+- `divide` - Division (a / b)
+
+**Success Response (200):**
+```json
+{
+  "operation": "add",
+  "a": 10,
+  "b": 5,
+  "result": 15
+}
+```
+
+**Error Responses (400):**
+- Missing required fields (operation, a, b)
+- Unsupported operation type
+- Invalid number format
+- Division by zero: `{"error": "Cannot divide by zero"}`
+
+**Features:**
+- Supports both integers and floating-point numbers
+- Comprehensive error handling with descriptive messages
+- Automatic type conversion for numeric inputs
+
 ## Request Logging
 
 The Flask application includes comprehensive request logging middleware that automatically logs:
@@ -51,7 +90,7 @@ All requests are logged at the INFO level using Python's logging module. Example
 ```
 2024-01-15 10:30:45,123 - app - INFO - Request: GET /hello - Status: 200 - Duration: 15.23 ms
 2024-01-15 10:30:46,456 - app - INFO - Request: GET /goodbye - Status: 200 - Duration: 12.78 ms
-2024-01-15 10:30:47,789 - app - INFO - Request: GET /nonexistent - Status: 404 - Duration: 8.45 ms
+2024-01-15 10:30:47,789 - app - INFO - Request: POST /math - Status: 200 - Duration: 8.45 ms
 ```
 
 ## Getting Started
@@ -93,6 +132,7 @@ pytest -v
 # Run specific test files
 pytest test_hello.py -v
 pytest test_logging_middleware.py -v
+pytest test_math.py -v
 ```
 
 ## Project Structure
@@ -104,6 +144,7 @@ pytest test_logging_middleware.py -v
 ├── app.py                   # Flask backend application with logging middleware
 ├── test_hello.py            # Unit tests for hello/goodbye endpoints
 ├── test_logging_middleware.py # Unit tests for logging middleware
+├── test_math.py             # Unit tests for math endpoint
 ├── demo_logging.py          # Demo script to test logging functionality
 ├── requirements.txt         # Python dependencies
 ├── pytest.ini              # Pytest configuration
@@ -128,8 +169,20 @@ curl http://localhost:5000/hello
 # Test the goodbye endpoint
 curl http://localhost:5000/goodbye
 
-# Test a non-existent endpoint (will return 404)
-curl http://localhost:5000/nonexistent
+# Test the math endpoint
+curl -X POST http://localhost:5000/math \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "add", "a": 10, "b": 5}'
+
+# Test math endpoint with floats
+curl -X POST http://localhost:5000/math \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "divide", "a": 7.5, "b": 2.5}'
+
+# Test error handling
+curl -X POST http://localhost:5000/math \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "divide", "a": 10, "b": 0}'
 ```
 
 All requests will be automatically logged with timing information.
@@ -147,6 +200,7 @@ Works in all modern browsers:
 - **Frontend Storage**: Uses browser's localStorage API for data persistence
 - **Frontend Dependencies**: Pure vanilla JavaScript with no external libraries
 - **Backend**: Flask Python web framework
+- **Math Operations**: Supports integers and floating-point arithmetic
 - **Testing**: pytest for unit tests with pytest-flask for Flask-specific testing
 - **Logging**: Python's built-in logging module with INFO level
 - **Request Timing**: High-precision timing using `time.time()` for millisecond accuracy
