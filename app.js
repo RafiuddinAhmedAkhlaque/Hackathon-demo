@@ -13,6 +13,9 @@ const emptyMessage = document.getElementById('empty-message');
 // Constants
 const STORAGE_KEY = 'my-notes-app-data';
 
+// State
+let editingNoteId = null;
+
 /**
  * Initialize the application
  */
@@ -38,11 +41,23 @@ function setupEventListeners() {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             handleSaveNote();
         }
+        
+        // Allow canceling edit mode with Escape
+        if (e.key === 'Escape' && editingNoteId) {
+            cancelEdit();
+        }
+    });
+
+    noteBodyInput.addEventListener('keydown', (e) => {
+        // Allow canceling edit mode with Escape
+        if (e.key === 'Escape' && editingNoteId) {
+            cancelEdit();
+        }
     });
 }
 
 /**
- * Handle saving a new note
+ * Handle saving a new note or updating an existing note
  */
 function handleSaveNote() {
     const title = noteTitleInput.value.trim();
@@ -55,17 +70,33 @@ function handleSaveNote() {
         return;
     }
 
-    // Create note object
-    const note = {
-        id: generateId(),
-        title: title || 'Untitled Note',
-        body: body,
-        createdAt: new Date().toISOString()
-    };
+    const notes = getNotes();
+
+    if (editingNoteId) {
+        // Update existing note
+        const noteIndex = notes.findIndex(note => note.id === editingNoteId);
+        if (noteIndex !== -1) {
+            notes[noteIndex] = {
+                ...notes[noteIndex],
+                title: title || 'Untitled Note',
+                body: body,
+                updatedAt: new Date().toISOString()
+            };
+        }
+        exitEditMode();
+    } else {
+        // Create new note
+        const note = {
+            id: generateId(),
+            title: title || 'Untitled Note',
+            body: body,
+            createdAt: new Date().toISOString()
+        };
+        
+        notes.unshift(note); // Add to beginning
+    }
 
     // Save to localStorage
-    const notes = getNotes();
-    notes.unshift(note); // Add to beginning
     saveNotes(notes);
 
     // Clear inputs
@@ -80,6 +111,103 @@ function handleSaveNote() {
 }
 
 /**
+ * Handle editing a note
+ * @param {string} noteId - The ID of the note to edit
+ */
+function handleEditNote(noteId) {
+    const notes = getNotes();
+    const note = notes.find(n => n.id === noteId);
+    
+    if (!note) return;
+
+    // Enter edit mode
+    editingNoteId = noteId;
+    
+    // Populate form fields
+    noteTitleInput.value = note.title === 'Untitled Note' ? '' : note.title;
+    noteBodyInput.value = note.body;
+    
+    // Update UI to show edit mode
+    updateSaveButtonForEdit();
+    
+    // Focus on title input and scroll to form
+    noteTitleInput.focus();
+    document.querySelector('.note-form').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center'
+    });
+
+    // Highlight the note being edited
+    highlightEditingNote(noteId);
+}
+
+/**
+ * Exit edit mode and return to create mode
+ */
+function exitEditMode() {
+    editingNoteId = null;
+    updateSaveButtonForCreate();
+    removeEditHighlight();
+}
+
+/**
+ * Cancel edit mode without saving
+ */
+function cancelEdit() {
+    exitEditMode();
+    noteTitleInput.value = '';
+    noteBodyInput.value = '';
+    noteTitleInput.focus();
+}
+
+/**
+ * Update save button appearance for edit mode
+ */
+function updateSaveButtonForEdit() {
+    const btnIcon = saveBtn.querySelector('.btn-icon');
+    const btnText = saveBtn.childNodes[saveBtn.childNodes.length - 1];
+    
+    btnIcon.textContent = '✓';
+    btnText.textContent = 'Update Note';
+    saveBtn.classList.add('btn-edit');
+}
+
+/**
+ * Update save button appearance for create mode
+ */
+function updateSaveButtonForCreate() {
+    const btnIcon = saveBtn.querySelector('.btn-icon');
+    const btnText = saveBtn.childNodes[saveBtn.childNodes.length - 1];
+    
+    btnIcon.textContent = '+';
+    btnText.textContent = 'Save Note';
+    saveBtn.classList.remove('btn-edit');
+}
+
+/**
+ * Highlight the note currently being edited
+ * @param {string} noteId - The ID of the note being edited
+ */
+function highlightEditingNote(noteId) {
+    // Remove any existing highlights
+    removeEditHighlight();
+    
+    // Add highlight to the note being edited
+    const noteCard = document.querySelector(`[data-note-id="${noteId}"]`);
+    if (noteCard) {
+        noteCard.classList.add('editing');
+    }
+}
+
+/**
+ * Remove edit highlight from all notes
+ */
+function removeEditHighlight() {
+    const editingCards = document.querySelectorAll('.note-card.editing');
+    editingCards.forEach(card => card.classList.remove('editing'));
+}
+
+/**
  * Handle deleting a note
  * @param {string} noteId - The ID of the note to delete
  */
@@ -87,6 +215,11 @@ function handleDeleteNote(noteId) {
     const noteCard = document.querySelector(`[data-note-id="${noteId}"]`);
     
     if (noteCard) {
+        // If we're editing this note, cancel the edit
+        if (editingNoteId === noteId) {
+            cancelEdit();
+        }
+        
         // Add removing animation
         noteCard.classList.add('removing');
         
@@ -153,6 +286,11 @@ function renderNotes() {
             notesContainer.appendChild(noteElement);
         });
     }
+
+    // Restore edit highlight if we're in edit mode
+    if (editingNoteId) {
+        highlightEditingNote(editingNoteId);
+    }
 }
 
 /**
@@ -172,6 +310,16 @@ function createNoteElement(note) {
     title.className = 'note-title';
     title.textContent = note.title;
 
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'note-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn-edit-note';
+    editBtn.innerHTML = '✏️';
+    editBtn.setAttribute('aria-label', 'Edit note');
+    editBtn.setAttribute('title', 'Edit note');
+    editBtn.addEventListener('click', () => handleEditNote(note.id));
+
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'btn-delete';
     deleteBtn.innerHTML = '&times;';
@@ -179,8 +327,11 @@ function createNoteElement(note) {
     deleteBtn.setAttribute('title', 'Delete note');
     deleteBtn.addEventListener('click', () => handleDeleteNote(note.id));
 
+    buttonContainer.appendChild(editBtn);
+    buttonContainer.appendChild(deleteBtn);
+
     header.appendChild(title);
-    header.appendChild(deleteBtn);
+    header.appendChild(buttonContainer);
 
     const content = document.createElement('p');
     content.className = 'note-content';
@@ -188,8 +339,10 @@ function createNoteElement(note) {
 
     const date = document.createElement('time');
     date.className = 'note-date';
-    date.setAttribute('datetime', note.createdAt);
-    date.textContent = formatDate(note.createdAt);
+    date.setAttribute('datetime', note.updatedAt || note.createdAt);
+    const dateText = formatDate(note.updatedAt || note.createdAt);
+    const prefix = note.updatedAt ? 'Updated ' : 'Created ';
+    date.textContent = prefix + dateText;
 
     article.appendChild(header);
     article.appendChild(content);
@@ -213,7 +366,7 @@ function formatDate(isoString) {
 
     // Just now (less than 1 minute)
     if (diffMins < 1) {
-        return 'Just now';
+        return 'just now';
     }
     
     // Minutes ago
@@ -228,7 +381,7 @@ function formatDate(isoString) {
     
     // Yesterday
     if (diffDays === 1) {
-        return 'Yesterday';
+        return 'yesterday';
     }
     
     // Within a week
