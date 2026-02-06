@@ -3,6 +3,7 @@ Flask application with hello endpoint
 """
 import logging
 import time
+from datetime import datetime
 from flask import Flask, jsonify, request, g
 
 # Configure logging
@@ -10,6 +11,15 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+def generate_timestamp():
+    """
+    Generate ISO 8601 formatted timestamp in UTC
+    
+    Returns:
+        str: ISO 8601 formatted timestamp (e.g., "2026-02-06T12:30:00Z")
+    """
+    return datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
 @app.before_request
 def before_request():
@@ -37,12 +47,26 @@ def after_request(response):
 @app.route('/hello', methods=['GET'])
 def hello():
     """Hello endpoint that returns a greeting message"""
-    return jsonify({"message": "Hello, World!"})
+    return jsonify({
+        "message": "Hello, World!",
+        "timestamp": generate_timestamp()
+    })
 
 @app.route('/goodbye', methods=['GET'])
 def goodbye():
     """Goodbye endpoint that returns a farewell message"""
-    return jsonify({"message": "Goodbye, World!"})
+    return jsonify({
+        "message": "Goodbye, World!",
+        "timestamp": generate_timestamp()
+    })
+
+@app.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint"""
+    return jsonify({
+        "status": "healthy",
+        "timestamp": generate_timestamp()
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
