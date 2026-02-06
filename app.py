@@ -49,25 +49,25 @@ def math_operation():
     """Math endpoint that performs basic arithmetic operations"""
     try:
         # Get JSON data from request
-        data = request.get_json()
+        rafi = request.get_json()
         
         # Validate that data is provided
-        if not data:
+        if not rafi:
             return jsonify({"error": "No JSON data provided"}), 400
         
         # Validate required fields
-        if 'operation' not in data:
+        if 'operation' not in rafi:
             return jsonify({"error": "Missing required field: operation"}), 400
         
-        if 'a' not in data:
+        if 'a' not in rafi:
             return jsonify({"error": "Missing required field: a"}), 400
             
-        if 'b' not in data:
+        if 'b' not in rafi:
             return jsonify({"error": "Missing required field: b"}), 400
         
-        operation = data['operation']
-        a = data['a']
-        b = data['b']
+        operation = rafi['operation']
+        a = rafi['a']
+        b = rafi['b']
         
         # Validate operation type
         supported_operations = ['add', 'subtract', 'multiply', 'divide']
