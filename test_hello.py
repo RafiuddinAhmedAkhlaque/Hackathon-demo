@@ -29,3 +29,22 @@ def test_hello_endpoint_response_format(client):
     assert isinstance(data, dict)
     assert "message" in data
     assert data["message"] == "Hello, World!"
+
+def test_goodbye_endpoint_returns_200(client):
+    """Test that GET /goodbye returns 200 status code"""
+    response = client.get('/goodbye')
+    assert response.status_code == 200
+
+def test_goodbye_endpoint_contains_goodbye_world(client):
+    """Test that response contains 'Goodbye, World!'"""
+    response = client.get('/goodbye')
+    data = response.get_json()
+    assert "Goodbye, World!" in data["message"]
+
+def test_goodbye_endpoint_response_format(client):
+    """Test that the response is in correct JSON format"""
+    response = client.get('/goodbye')
+    data = response.get_json()
+    assert isinstance(data, dict)
+    assert "message" in data
+    assert data["message"] == "Goodbye, World!"
