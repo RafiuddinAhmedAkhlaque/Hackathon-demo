@@ -1,7 +1,6 @@
 # My Notes App
 
 A simple, clean note-taking web application built with vanilla HTML, CSS, and JavaScript, with a Flask API backend.
-A simple, clean note-taking web application built with vanilla HTML, CSS, and JavaScript, now with Express.js backend API.
 
 ## Features
 
@@ -12,12 +11,7 @@ A simple, clean note-taking web application built with vanilla HTML, CSS, and Ja
 - **Modern UI**: Clean design with smooth animations and transitions
 - **Responsive**: Works great on desktop, tablet, and mobile devices
 - **API Backend**: Flask backend with hello endpoint
-
-## Getting Started
-
-### Frontend Only
-Simply open `index.html` in your web browser. No build tools or server required!
-- **API Endpoints**: RESTful API for programmatic access
+- **Request Logging**: Automatic logging of all HTTP requests with timing information
 
 ## API Endpoints
 
@@ -33,27 +27,37 @@ Returns a simple greeting message.
 
 **Status Code:** 200
 
+### GET /goodbye
+Returns a simple farewell message.
+
+**Response:**
+```json
+{
+  "message": "Goodbye, World!"
+}
+```
+
+**Status Code:** 200
+
+## Request Logging
+
+The Flask application includes comprehensive request logging middleware that automatically logs:
+- Request method (GET, POST, etc.)
+- Request path
+- Response status code
+- Request duration in milliseconds
+
+All requests are logged at the INFO level using Python's logging module. Example log output:
+```
+2024-01-15 10:30:45,123 - app - INFO - Request: GET /hello - Status: 200 - Duration: 15.23 ms
+2024-01-15 10:30:46,456 - app - INFO - Request: GET /goodbye - Status: 200 - Duration: 12.78 ms
+2024-01-15 10:30:47,789 - app - INFO - Request: GET /nonexistent - Status: 404 - Duration: 8.45 ms
+```
+
 ## Getting Started
 
-### Prerequisites
-- Node.js (version 14 or higher)
-- npm (comes with Node.js)
-
-### Installation
-
-1. Clone or download the repository
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the server:
-```bash
-npm start
-```
-
 ### Backend API
-To run the Flask backend with the hello endpoint:
+To run the Flask backend:
 
 ```bash
 # Install dependencies
@@ -65,70 +69,70 @@ python app.py
 
 The API will be available at `http://localhost:5000`
 
+### Testing the Logging Middleware
+You can test the logging functionality using the included demo script:
+
+```bash
+# Make sure the Flask server is running first (python app.py)
+# Then in another terminal:
+python demo_logging.py
+```
+
+This will make sample requests to the API endpoints and you can observe the log output in the Flask server console.
+
 ### Running Tests
-To run the unit tests for the hello endpoint:
+To run the unit tests:
 
 ```bash
 # Make sure dependencies are installed
 pip install -r requirements.txt
 
-# Run tests with pytest
+# Run all tests
+pytest -v
+
+# Run specific test files
 pytest test_hello.py -v
+pytest test_logging_middleware.py -v
 ```
 
 ## Project Structure
 
 ```
-├── index.html      # Main HTML entry point
-├── styles.css      # All CSS styles
-├── app.js          # JavaScript application logic (frontend)
-├── app.py          # Flask backend application
-├── test_hello.py   # Unit tests for hello endpoint
-├── requirements.txt # Python dependencies
-├── pytest.ini     # Pytest configuration
-└── README.md       # This file
-4. Open your browser and visit `http://localhost:3000`
-
-### Development Mode
-
-For development with auto-reload:
-```bash
-npm run dev
+├── index.html                # Main HTML entry point
+├── styles.css               # All CSS styles
+├── app.js                   # JavaScript application logic (frontend)
+├── app.py                   # Flask backend application with logging middleware
+├── test_hello.py            # Unit tests for hello/goodbye endpoints
+├── test_logging_middleware.py # Unit tests for logging middleware
+├── demo_logging.py          # Demo script to test logging functionality
+├── requirements.txt         # Python dependencies
+├── pytest.ini              # Pytest configuration
+└── README.md               # This file
 ```
-
-## Testing the API
-
-You can test the API endpoints using curl or any HTTP client:
-
-```bash
-# Test the hello endpoint
-curl http://localhost:3000/hello
-```
-
-Or visit `http://localhost:3000/hello` directly in your browser.
-
-## Project Structure
-
-```
-├── index.html     # Main HTML entry point
-├── styles.css     # All CSS styles
-├── app.js         # Frontend JavaScript application logic
-├── server.js      # Express.js server with API endpoints
-├── package.json   # Node.js project configuration
-└── README.md      # This file
-```
-
-## API Endpoints
-
-- `GET /hello` - Returns a hello world message
 
 ## Usage
 
+### Frontend
 1. **Create a note**: Enter a title and content in the form fields, then click "Save Note"
 2. **View notes**: All saved notes appear as cards in the grid below the form
 3. **Delete a note**: Click the × button on any note card to remove it
 4. **Keyboard shortcut**: Press `Ctrl/Cmd + Enter` while in the form to quickly save a note
-5. **API Access**: Use the `/hello` endpoint to get a programmatic greeting
+
+### API Usage
+Test the API endpoints using curl or any HTTP client:
+
+```bash
+# Test the hello endpoint
+curl http://localhost:5000/hello
+
+# Test the goodbye endpoint
+curl http://localhost:5000/goodbye
+
+# Test a non-existent endpoint (will return 404)
+curl http://localhost:5000/nonexistent
+```
+
+All requests will be automatically logged with timing information.
 
 ## Browser Support
 
@@ -143,10 +147,9 @@ Works in all modern browsers:
 - **Frontend Storage**: Uses browser's localStorage API for data persistence
 - **Frontend Dependencies**: Pure vanilla JavaScript with no external libraries
 - **Backend**: Flask Python web framework
-- **Testing**: pytest for unit tests
-- **Frontend**: Pure vanilla JavaScript with no external libraries
-- **Backend**: Express.js server for API endpoints
-- **Storage**: Uses browser's localStorage API for data persistence (frontend)
+- **Testing**: pytest for unit tests with pytest-flask for Flask-specific testing
+- **Logging**: Python's built-in logging module with INFO level
+- **Request Timing**: High-precision timing using `time.time()` for millisecond accuracy
 - **Responsive design**: CSS Grid and Flexbox for layout
 - **Animations**: CSS animations and transitions for smooth UX
 
