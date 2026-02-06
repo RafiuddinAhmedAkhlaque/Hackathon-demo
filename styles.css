@@ -10,6 +10,8 @@
 :root {
     --primary-color: #4a90d9;
     --primary-hover: #3a7bc8;
+    --edit-color: #27ae60;
+    --edit-hover: #229954;
     --danger-color: #e74c3c;
     --danger-hover: #c0392b;
     --background-color: #f5f7fa;
@@ -17,9 +19,11 @@
     --text-primary: #2c3e50;
     --text-secondary: #7f8c8d;
     --border-color: #e1e8ed;
+    --editing-border: #27ae60;
     --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
     --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.12);
     --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.15);
+    --shadow-editing: 0 4px 20px rgba(39, 174, 96, 0.2);
     --border-radius: 12px;
     --transition-speed: 0.3s;
 }
@@ -131,6 +135,14 @@ header h1 {
     transform: translateY(0);
 }
 
+.btn-save.btn-edit {
+    background-color: var(--edit-color);
+}
+
+.btn-save.btn-edit:hover {
+    background-color: var(--edit-hover);
+}
+
 .btn-icon {
     font-size: 1.3rem;
     font-weight: 700;
@@ -162,8 +174,9 @@ header h1 {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed), border-color var(--transition-speed);
     animation: fadeIn 0.3s ease-out;
+    border: 2px solid transparent;
 }
 
 @keyframes fadeIn {
@@ -180,6 +193,16 @@ header h1 {
 .note-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-hover);
+}
+
+.note-card.editing {
+    border-color: var(--editing-border);
+    box-shadow: var(--shadow-editing);
+    transform: translateY(-2px);
+}
+
+.note-card.editing:hover {
+    transform: translateY(-2px); /* Override hover transform when editing */
 }
 
 .note-card.removing {
@@ -213,6 +236,33 @@ header h1 {
     margin-right: 12px;
 }
 
+.note-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.btn-edit-note {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: color var(--transition-speed), background-color var(--transition-speed), transform var(--transition-speed);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-edit-note:hover {
+    color: var(--edit-color);
+    background-color: rgba(39, 174, 96, 0.1);
+    transform: scale(1.1);
+}
+
 .btn-delete {
     background: none;
     border: none;
@@ -221,13 +271,14 @@ header h1 {
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 6px;
-    transition: color var(--transition-speed), background-color var(--transition-speed);
+    transition: color var(--transition-speed), background-color var(--transition-speed), transform var(--transition-speed);
     line-height: 1;
 }
 
 .btn-delete:hover {
     color: var(--danger-color);
     background-color: rgba(231, 76, 60, 0.1);
+    transform: scale(1.1);
 }
 
 .note-content {
@@ -311,6 +362,15 @@ footer {
 
     .note-card {
         padding: 20px;
+    }
+
+    .note-actions {
+        gap: 2px;
+    }
+
+    .btn-edit-note,
+    .btn-delete {
+        padding: 4px 6px;
     }
 }
 
