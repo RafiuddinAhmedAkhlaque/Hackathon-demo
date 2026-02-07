@@ -3,6 +3,7 @@ from flask import Flask
 from routes.stock_routes import stock_bp
 from routes.warehouse_routes import warehouse_bp
 from routes.movement_routes import movement_bp
+from routes.hello_routes import hello_bp
 
 
 def create_app():
@@ -11,6 +12,7 @@ def create_app():
     app.register_blueprint(stock_bp, url_prefix="/stock")
     app.register_blueprint(warehouse_bp, url_prefix="/warehouses")
     app.register_blueprint(movement_bp, url_prefix="/movements")
+    app.register_blueprint(hello_bp, url_prefix="/hello")
 
     @app.route("/health")
     def health():
