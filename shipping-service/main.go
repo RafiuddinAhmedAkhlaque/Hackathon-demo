@@ -3,14 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
-	"github.com/ecommerce/payment-service/handlers"
-	"github.com/ecommerce/payment-service/models"
-	"github.com/ecommerce/payment-service/repositories"
-	"github.com/ecommerce/payment-service/services"
+	"github.com/ecommerce/shipping-service/services"
 )
 
 type LogData struct {
@@ -57,14 +53,8 @@ func (rw *responseWriter) WriteHeader(code int) {
 }
 
 func main() {
-	paymentRepo := repositories.NewPaymentRepository()
-	transactionRepo := repositories.NewTransactionRepository()
-	paymentService := services.NewPaymentService(paymentRepo, transactionRepo)
-	refundService := services.NewRefundService(paymentRepo, transactionRepo)
-	ledgerService := services.NewLedgerService(transactionRepo)
-
-	paymentHandler := handlers.NewPaymentHandler(paymentService)
-	refundHandler := handlers.NewRefundHandler(refundService)
+	rateCalculator := services.NewRateCalculator()
+	_ = rateCalculator // Use the service
 
 	mux := http.NewServeMux()
 
@@ -72,29 +62,14 @@ func main() {
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{
 			"status":  "healthy",
-			"service": "payment-service",
+			"service": "shipping-service",
 		})
-	})
-
-	// Payment routes
-	mux.HandleFunc("/payments", paymentHandler.HandlePayments)
-	mux.HandleFunc("/payments/", paymentHandler.HandlePaymentByID)
-
-	// Refund routes
-	mux.HandleFunc("/refunds", refundHandler.HandleRefunds)
-
-	// Ledger routes
-	mux.HandleFunc("/ledger", func(w http.ResponseWriter, r *http.Request) {
-		_ = ledgerService
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(models.Transaction{})
 	})
 
 	// Wrap mux with logging middleware
 	loggedMux := jsonLoggingMiddleware(mux)
 
-	port := ":8004"
-	fmt.Printf("Payment Service running on port %s\n", port)
-	log.Fatal(http.ListenAndServe(port, loggedMux))
+	port := ":8007"
+	fmt.Printf("Shipping Service running on port %s\n", port)
+	http.ListenAndServe(port, loggedMux)
 }
-
