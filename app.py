@@ -44,5 +44,68 @@ def goodbye():
     """Goodbye endpoint that returns a farewell message"""
     return jsonify({"message": "Goodbye, World!"})
 
+@app.route('/math', methods=['POST'])
+def math_operations():
+    """Math endpoint that performs basic arithmetic operations"""
+    # Get JSON data from request
+    try:
+        data = request.get_json(force=True)
+    except Exception:
+        return jsonify({"error": "Request must contain valid JSON data"}), 400
+    
+    # Validate that request contains JSON data
+    if data is None:
+        return jsonify({"error": "Request must contain JSON data"}), 400
+    
+    # Validate required fields
+    if 'operation' not in data:
+        return jsonify({"error": "Missing required field: operation"}), 400
+    
+    if 'a' not in data:
+        return jsonify({"error": "Missing required field: a"}), 400
+    
+    if 'b' not in data:
+        return jsonify({"error": "Missing required field: b"}), 400
+    
+    # Get values
+    operation = data['operation']
+    a = data['a']
+    b = data['b']
+    
+    # Validate operation type
+    supported_operations = ['add', 'subtract', 'multiply', 'divide']
+    if operation not in supported_operations:
+        return jsonify({"error": f"Unsupported operation. Supported operations: {', '.join(supported_operations)}"}), 400
+    
+    # Validate that a and b are numbers
+    try:
+        a = float(a)
+        b = float(b)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Values 'a' and 'b' must be numbers"}), 400
+    
+    # Perform the calculation
+    try:
+        if operation == 'add':
+            result = a + b
+        elif operation == 'subtract':
+            result = a - b
+        elif operation == 'multiply':
+            result = a * b
+        elif operation == 'divide':
+            if b == 0:
+                return jsonify({"error": "Cannot divide by zero"}), 400
+            result = a / b
+    except Exception as e:
+        return jsonify({"error": f"Calculation error: {str(e)}"}), 400
+    
+    # Return the result
+    return jsonify({
+        "operation": operation,
+        "a": a,
+        "b": b,
+        "result": result
+    }), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
