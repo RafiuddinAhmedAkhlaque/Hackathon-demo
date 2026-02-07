@@ -13,6 +13,12 @@ INSTALLED_APPS = [
     "analytics_app",
 ]
 
+MIDDLEWARE = [
+    "analytics_app.middleware.JsonLoggingMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+]
+
 ROOT_URLCONF = "analytics.urls"
 
 DATABASES = {
@@ -26,6 +32,29 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
+}
+
+# Structured JSON logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'json': {
+            'format': '%(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'json',
+        },
+    },
+    'loggers': {
+        'analytics_app.middleware': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
