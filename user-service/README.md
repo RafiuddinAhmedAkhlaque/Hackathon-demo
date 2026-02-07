@@ -2,7 +2,7 @@
 
 A FastAPI-based microservice that handles user registration, authentication, profile management, and address book functionality.
 
-## Overview
+# Overview
 
 The User Service is part of a larger microservices architecture and provides the following core functionalities:
 
