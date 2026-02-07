@@ -39,6 +39,72 @@ Returns a simple farewell message.
 
 **Status Code:** 200
 
+### POST /math
+Performs basic arithmetic operations.
+
+**Request Body:**
+```json
+{
+  "operation": "add",
+  "a": 10,
+  "b": 5
+}
+```
+
+**Supported Operations:**
+- `"add"` - Returns a + b
+- `"subtract"` - Returns a - b  
+- `"multiply"` - Returns a * b
+- `"divide"` - Returns a / b
+
+**Response (Success):**
+```json
+{
+  "operation": "add",
+  "a": 10,
+  "b": 5,
+  "result": 15
+}
+```
+
+**Status Code:** 200
+
+**Error Responses:**
+
+400 Bad Request - Invalid operation:
+```json
+{
+  "error": "Operation must be one of: add, subtract, multiply, divide"
+}
+```
+
+400 Bad Request - Missing required field:
+```json
+{
+  "error": "Missing required field: operation"
+}
+```
+
+400 Bad Request - Invalid numbers:
+```json
+{
+  "error": "Fields 'a' and 'b' must be valid numbers"
+}
+```
+
+400 Bad Request - Division by zero:
+```json
+{
+  "error": "Cannot divide by zero"
+}
+```
+
+**Features:**
+- Supports decimal numbers (floats)
+- Accepts string representations of numbers
+- Comprehensive input validation
+- Proper error handling with descriptive messages
+
 ## Request Logging
 
 The Flask application includes comprehensive request logging middleware that automatically logs:
@@ -93,6 +159,7 @@ pytest -v
 # Run specific test files
 pytest test_hello.py -v
 pytest test_logging_middleware.py -v
+pytest test_math.py -v
 ```
 
 ## Project Structure
@@ -104,6 +171,7 @@ pytest test_logging_middleware.py -v
 ├── app.py                   # Flask backend application with logging middleware
 ├── test_hello.py            # Unit tests for hello/goodbye endpoints
 ├── test_logging_middleware.py # Unit tests for logging middleware
+├── test_math.py             # Unit tests for math endpoint
 ├── demo_logging.py          # Demo script to test logging functionality
 ├── requirements.txt         # Python dependencies
 ├── pytest.ini              # Pytest configuration
@@ -130,6 +198,16 @@ curl http://localhost:5000/goodbye
 
 # Test a non-existent endpoint (will return 404)
 curl http://localhost:5000/nonexistent
+
+# Test the math endpoint
+curl -X POST http://localhost:5000/math \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "add", "a": 10, "b": 5}'
+
+# Test math endpoint with decimals
+curl -X POST http://localhost:5000/math \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "divide", "a": 22.5, "b": 4.5}'
 ```
 
 All requests will be automatically logged with timing information.
